@@ -28,8 +28,9 @@ module.exports = function (grunt) {
     function transpile(opts) {
         // base, entry, skip, headerFile, skipLines, target
         var umdName = opts.headerFile ? 'not_used' : opts.umdName,
-            header = opts.headerFile ? getHeaderByFile(opts.headerFile) : '',
-            skipLines = opts.skipLines ? opts.skipLines : 0;
+            headerFile = opts.headerFile ? opts.headerFile : 'templates/default.js',
+            header = getHeaderByFile(headerFile),
+            skipLines = opts.skipLines ? opts.skipLines : 5;
 
         return esperanto.bundle({
             base: opts.base,
@@ -105,7 +106,11 @@ module.exports = function (grunt) {
             code = files.map(function (file) {
                 var identifier = path.basename(file, '.js').replace('-', '_');
                 return 'import ' + identifier + ' from "./' + file + '";';
-            }).join('\n');
+            }).concat([
+                // Reset the language back to 'en', because every defineLocale
+                // also sets it.
+                'moment.locale(\'en\');'
+            ]).join('\n');
         return transpileCode({
             base: 'src',
             code: code,
